@@ -1,6 +1,8 @@
-fastapi
+﻿fastapi
 uvicorn
 pydantic
 pyyaml
 python-dotenv
 requests
+sqlalchemy
+psycopg2-binary
