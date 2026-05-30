@@ -82,6 +82,29 @@ def hash_password(plain: str) -> str:
     return pwd_context.hash(plain)
 
 
+def _try_supabase_jwt(token: str, db: Session) -> Optional[models.User]:
+    """
+    Attempt to resolve a Supabase JWT to a local User.
+    Maps Supabase `email` claim to User.username (email-as-username convention).
+    Returns None if Supabase auth is not configured or token is invalid.
+    """
+    try:
+        from supabase.auth import verify_supabase_jwt, extract_supabase_user_info
+        claims = verify_supabase_jwt(token)
+        if not claims:
+            return None
+        info = extract_supabase_user_info(claims)
+        username = info.get("email") or info.get("sub", "")
+        if not username:
+            return None
+        return db.query(models.User).filter(
+            models.User.username == username,
+            models.User.is_active == True,
+        ).first()
+    except Exception:
+        return None
+
+
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
@@ -91,15 +114,21 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    # 1. Try internal JWT
     try:
         payload = _decode_token(token)
         username: str = payload.get("sub")
-        if not username:
-            raise credentials_exception
+        if username:
+            user = db.query(models.User).filter(models.User.username == username).first()
+            if user and user.is_active:
+                return user
     except ValueError:
-        raise credentials_exception
+        pass
 
-    user = db.query(models.User).filter(models.User.username == username).first()
-    if user is None or not user.is_active:
-        raise credentials_exception
-    return user
+    # 2. Try Supabase JWT passthrough
+    supabase_user = _try_supabase_jwt(token, db)
+    if supabase_user:
+        return supabase_user
+
+    raise credentials_exception
