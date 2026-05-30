@@ -80,9 +80,12 @@ class TaxRecord(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True, index=True)
+
     creator = relationship("User", foreign_keys=[created_by], back_populates="tax_records")
     documents = relationship("TaxDocument", back_populates="record", cascade="all, delete-orphan")
     rd_projects = relationship("RDProject", back_populates="record", cascade="all, delete-orphan")
+    tenant = relationship("Tenant", back_populates="tax_records", foreign_keys=[tenant_id])
 
 
 class RDProject(Base):
@@ -148,3 +151,49 @@ class AnalyticsSnapshot(Base):
     payload = Column(Text, nullable=False)   # JSON blob
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
+
+
+# ─── Multi-Tenant ──────────────────────────────────────────────────────────────
+
+class Firm(Base):
+    __tablename__ = "firms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, nullable=False)
+    slug = Column(String(100), unique=True, nullable=False, index=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    plan = Column(String(50), default="starter", nullable=False)
+    created_at = Column(DateTime(timezone=True), default=func.now())
+
+    tenants = relationship("Tenant", back_populates="firm", cascade="all, delete-orphan")
+
+
+class Tenant(Base):
+    __tablename__ = "tenants"
+
+    id = Column(Integer, primary_key=True, index=True)
+    firm_id = Column(Integer, ForeignKey("firms.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    external_id = Column(String(100), nullable=True, index=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=func.now())
+
+    firm = relationship("Firm", back_populates="tenants")
+    tax_records = relationship("TaxRecord", back_populates="tenant")
+    audit_logs = relationship("AuditLog", back_populates="tenant")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    action = Column(String(100), nullable=False)
+    resource_type = Column(String(50), nullable=False)
+    resource_id = Column(Integer, nullable=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True, index=True)
+    ip_address = Column(String(45), nullable=True)
+    details = Column(Text, nullable=True)  # JSON blob
+    created_at = Column(DateTime(timezone=True), default=func.now())
+
+    tenant = relationship("Tenant", back_populates="audit_logs")

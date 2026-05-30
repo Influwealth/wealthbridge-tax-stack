@@ -4,8 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, tax_records, forms, integrations, users, documents, rd, agent, analytics
+from app.routers import auth, tax_records, forms, integrations, users, documents, rd, agent, analytics, admin
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.tenant import TenantMiddleware
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("API")
@@ -26,6 +27,7 @@ app = FastAPI(
 )
 
 app.add_middleware(RateLimitMiddleware)
+app.add_middleware(TenantMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
@@ -50,6 +52,7 @@ app.include_router(documents.router)
 app.include_router(rd.router)
 app.include_router(agent.router)
 app.include_router(analytics.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")
