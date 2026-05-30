@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models
-from app.auth import get_current_user
+from app.rbac import require_permission
 from tax_capsule.utils.schemas import TaxRecordCreate, TaxRecordUpdate, TaxRecordResponse, TaxCalculationRequest
 from tax_capsule.tax_engine import calculate_tax
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/tax/records", tags=["tax-records"])
 def create_record(
     payload: TaxRecordCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(require_permission("records:write")),
 ):
     calc = calculate_tax(
         TaxCalculationRequest(
@@ -45,7 +45,7 @@ def list_records(
     limit: int = 50,
     tax_year: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("records:read")),
 ):
     q = db.query(models.TaxRecord)
     if tax_year:
@@ -57,7 +57,7 @@ def list_records(
 def get_record(
     record_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("records:read")),
 ):
     record = db.query(models.TaxRecord).filter(models.TaxRecord.id == record_id).first()
     if not record:
@@ -70,7 +70,7 @@ def update_record(
     record_id: int,
     payload: TaxRecordUpdate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("records:write")),
 ):
     record = db.query(models.TaxRecord).filter(models.TaxRecord.id == record_id).first()
     if not record:
@@ -95,7 +95,7 @@ def update_record(
 def delete_record(
     record_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("records:write")),
 ):
     record = db.query(models.TaxRecord).filter(models.TaxRecord.id == record_id).first()
     if not record:

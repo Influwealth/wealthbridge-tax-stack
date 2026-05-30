@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models
-from app.auth import get_current_user
+from app.rbac import require_permission
 from irs_forms.form_1065 import generate_1065
 from irs_forms.form_1120 import generate_1120
 from irs_forms.form_941 import generate_941
@@ -22,7 +22,7 @@ def _get_record_or_404(record_id: int, db: Session) -> models.TaxRecord:
 def generate_form_1065(
     record_id: int,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("filings:read")),
 ):
     record = _get_record_or_404(record_id, db)
     if record.entity_type != "partnership":
@@ -36,7 +36,7 @@ def generate_form_1065(
 def generate_form_1120(
     record_id: int,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("filings:read")),
 ):
     record = _get_record_or_404(record_id, db)
     if record.entity_type != "corporation":
@@ -51,7 +51,7 @@ def generate_form_941(
     record_id: int,
     quarter: int = 1,
     db: Session = Depends(get_db),
-    _: models.User = Depends(get_current_user),
+    _: models.User = Depends(require_permission("filings:read")),
 ):
     record = _get_record_or_404(record_id, db)
     if record.entity_type != "employer":

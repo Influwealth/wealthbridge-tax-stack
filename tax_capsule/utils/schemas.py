@@ -1,7 +1,33 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from datetime import datetime
 from decimal import Decimal
+
+
+# --- RBAC ---
+class RoleAssign(BaseModel):
+    username: str
+    role: Literal["admin", "accountant", "business_owner", "agent", "auditor"]
+
+
+class RoleRevoke(BaseModel):
+    username: str
+    role: Literal["admin", "accountant", "business_owner", "agent", "auditor"]
+
+
+class UserRoleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    role: str
+    granted_at: datetime
+
+
+class UserWithRolesResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    username: str
+    is_active: bool
+    roles: List[str]
 
 
 # --- Auth ---

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, tax_records, forms, integrations
+from app.routers import auth, tax_records, forms, integrations, users
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("API")
@@ -40,6 +40,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(tax_records.router)
 app.include_router(forms.router)
 app.include_router(integrations.router)
