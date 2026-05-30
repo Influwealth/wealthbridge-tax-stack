@@ -12,7 +12,7 @@ def test_rd_basic():
     result = run_rd_analysis(data)
     assert result["status"] == "ANALYZED"
     assert Decimal(result["estimated_credit"]) > Decimal("0")
-    assert result["method"] == "Alternative Simplified Credit (IRC §41)"
+    assert "ASC" in result["method"]
     assert result["project"] == "AI Tax Engine"
 
 

@@ -1,14 +1,15 @@
+"""
+rd_plugin.rd_core — thin wrapper around qre_agent.engine.
+
+Keeps the existing run_rd_analysis() API so integrations.py and legacy
+callers continue to work without changes.
+"""
 from decimal import Decimal
 from tax_capsule.utils.logger import get_logger
+from qre_agent.engine import calculate_credit
+from qre_agent.scorer import ExpenseCategory
 
 logger = get_logger("RDPlugin")
-
-# IRC §41 — Research Credit, Alternative Simplified Credit (ASC)
-# ASC rate: 14% of QREs exceeding 50% of avg prior 3yr QREs.
-# Simplified here (no historical QRE data): 14% of total current-year QREs.
-ASC_RATE = Decimal("0.14")
-# Contract research: only 65% qualifies under IRC §41(b)(3)
-CONTRACT_RESEARCH_FACTOR = Decimal("0.65")
 
 
 def run_rd_analysis(data: dict) -> dict:
@@ -23,12 +24,25 @@ def run_rd_analysis(data: dict) -> dict:
         logger.error(f"Invalid R&D input data: {e}")
         return {"project": project, "status": "ERROR", "error": str(e)}
 
-    contract_qualified = (contract_raw * CONTRACT_RESEARCH_FACTOR).quantize(Decimal("0.01"))
-    total_qre = qualified_expenses + wages + supplies + contract_qualified
-    estimated_credit = (total_qre * ASC_RATE).quantize(Decimal("0.01"))
+    # Build structured expense list for the engine
+    expenses = []
+    if wages > 0:
+        expenses.append({"category": ExpenseCategory.wages.value, "amount": str(wages)})
+    if supplies > 0:
+        expenses.append({"category": ExpenseCategory.supplies.value, "amount": str(supplies)})
+    if contract_raw > 0:
+        expenses.append({"category": ExpenseCategory.contract_research.value, "amount": str(contract_raw)})
+    if qualified_expenses > 0:
+        expenses.append({"category": ExpenseCategory.other_qualified.value, "amount": str(qualified_expenses)})
+
+    if not expenses:
+        return {"project": project, "status": "ANALYZED", "total_qre": "0.00", "estimated_credit": "0.00"}
+
+    result = calculate_credit(expenses)
 
     logger.info(
-        f"R&D analysis for '{project}': total_qre={total_qre}, credit={estimated_credit}"
+        f"R&D analysis for '{project}': total_qre={result['total_qre']}, "
+        f"credit={result['estimated_credit']}"
     )
 
     return {
@@ -36,10 +50,12 @@ def run_rd_analysis(data: dict) -> dict:
         "qualified_expenses": str(qualified_expenses),
         "total_wages_included": str(wages),
         "supply_costs_included": str(supplies),
-        "contract_research_65pct": str(contract_qualified),
-        "total_qre": str(total_qre),
-        "credit_rate": str(ASC_RATE),
-        "estimated_credit": str(estimated_credit),
-        "method": "Alternative Simplified Credit (IRC §41)",
+        "contract_research_65pct": str(
+            (contract_raw * Decimal("0.65")).quantize(Decimal("0.01"))
+        ),
+        "total_qre": result["total_qre"],
+        "credit_rate": result["credit_rate"],
+        "estimated_credit": result["estimated_credit"],
+        "method": result["method"],
         "status": "ANALYZED",
     }

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, tax_records, forms, integrations, users, documents
+from app.routers import auth, tax_records, forms, integrations, users, documents, rd
 from app.middleware.rate_limit import RateLimitMiddleware
 from tax_capsule.utils.logger import get_logger
 
@@ -47,6 +47,7 @@ app.include_router(tax_records.router)
 app.include_router(forms.router)
 app.include_router(integrations.router)
 app.include_router(documents.router)
+app.include_router(rd.router)
 
 
 @app.get("/health")

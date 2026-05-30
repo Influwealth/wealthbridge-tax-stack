@@ -100,10 +100,93 @@ class TaxRecordResponse(BaseModel):
     updated_at: Optional[datetime]
 
 
-# --- R&D ---
+# --- R&D (legacy integration endpoint) ---
 class RDAnalysisRequest(BaseModel):
     project_name: str
     qualified_expenses: Decimal
     total_wages: Optional[Decimal] = None
     supply_costs: Optional[Decimal] = None
     contract_research: Optional[Decimal] = None
+
+
+# --- QRE Agent: R&D Project CRUD ---
+class RDProjectCreate(BaseModel):
+    record_id: int
+    project_name: str = Field(..., min_length=3, max_length=200)
+    description: Optional[str] = None
+    principal_researcher: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    is_ongoing: bool = False
+
+
+class RDProjectUpdate(BaseModel):
+    project_name: Optional[str] = Field(None, min_length=3, max_length=200)
+    description: Optional[str] = None
+    principal_researcher: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    is_ongoing: Optional[bool] = None
+
+
+class RDExpenseCreate(BaseModel):
+    category: Literal["wages", "supplies", "contract_research", "other_qualified", "non_qualified"]
+    amount: Decimal = Field(..., gt=0)
+    description: Optional[str] = Field(None, max_length=500)
+
+
+class RDDocumentSubmit(BaseModel):
+    doc_name: str = Field(..., min_length=1, max_length=200)
+    doc_type: Optional[Literal[
+        "lab_notebook", "technical_report", "contractor_agreement",
+        "patent_application", "design_document", "test_results", "other"
+    ]] = None
+
+
+class RDExpenseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    project_id: int
+    category: str
+    description: Optional[str]
+    amount: Decimal
+    qualification_rate: Decimal
+    qualified_amount: Decimal
+
+
+class RDDocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    project_id: int
+    doc_name: str
+    doc_type: Optional[str]
+    is_valid: bool
+    validation_score: int
+    issues: Optional[str]
+
+
+class RDProjectResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    record_id: int
+    project_name: str
+    description: Optional[str]
+    activity_type: Optional[str]
+    is_qualified: bool
+    principal_researcher: Optional[str]
+    start_date: Optional[str]
+    end_date: Optional[str]
+    is_ongoing: bool
+    total_qre: Decimal
+    estimated_credit: Decimal
+    validation_score: int
+    expenses: List[RDExpenseResponse] = []
+    rd_documents: List[RDDocumentResponse] = []
+
+
+class RDCreditSummary(BaseModel):
+    record_id: int
+    project_count: int
+    total_qre: Decimal
+    total_estimated_credit: Decimal
+    projects: List[RDProjectResponse]
