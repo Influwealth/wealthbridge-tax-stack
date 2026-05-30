@@ -1,4 +1,5 @@
 from decimal import Decimal
+from irs_forms.base import validate_record, to_dec
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("Form1065")
@@ -10,8 +11,9 @@ def generate_1065(record) -> dict:
     Partnerships are pass-through entities — no entity-level income tax.
     Income flows to Schedule K and then to partners' K-1s.
     """
-    income = Decimal(str(record.income))
-    expenses = Decimal(str(record.expenses))
+    validate_record(record, expected_entity_type="partnership")
+    income = to_dec(record.income)
+    expenses = to_dec(record.expenses)
     ordinary_income = max(income - expenses, Decimal("0"))
 
     logger.info(f"Generating 1065 for {record.entity_name} tax_year={record.tax_year}")

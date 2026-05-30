@@ -1,4 +1,5 @@
 from decimal import Decimal
+from irs_forms.base import validate_record, to_dec
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("Form941")
@@ -19,7 +20,8 @@ def generate_941(record, quarter: int = 1) -> dict:
     Note: federal income tax withholding uses a 22% proxy — production use
     requires per-employee W-4 withholding data.
     """
-    wages = Decimal(str(record.income))
+    validate_record(record, expected_entity_type="employer")
+    wages = to_dec(record.income)
     quarter = max(1, min(4, int(quarter)))
 
     employee_ss = (wages * EMPLOYEE_SS_RATE).quantize(Decimal("0.01"))

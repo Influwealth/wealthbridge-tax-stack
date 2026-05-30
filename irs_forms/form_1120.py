@@ -1,4 +1,5 @@
 from decimal import Decimal
+from irs_forms.base import validate_record, to_dec
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("Form1120")
@@ -9,8 +10,9 @@ CORPORATE_TAX_RATE = Decimal("0.21")
 
 def generate_1120(record) -> dict:
     """Generate IRS Form 1120 data for a C-corporation."""
-    income = Decimal(str(record.income))
-    expenses = Decimal(str(record.expenses))
+    validate_record(record, expected_entity_type="corporation")
+    income = to_dec(record.income)
+    expenses = to_dec(record.expenses)
     taxable_income = max(income - expenses, Decimal("0"))
     total_tax = (taxable_income * CORPORATE_TAX_RATE).quantize(Decimal("0.01"))
 

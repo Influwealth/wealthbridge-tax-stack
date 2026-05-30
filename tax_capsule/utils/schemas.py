@@ -52,7 +52,10 @@ class Token(BaseModel):
 class TaxCalculationRequest(BaseModel):
     income: Decimal = Field(..., gt=0, description="Total gross income")
     expenses: Optional[Decimal] = Field(Decimal("0"), ge=0)
-    entity_type: Optional[Literal["partnership", "corporation", "employer"]] = None
+    entity_type: Optional[Literal[
+        "partnership", "corporation", "employer",
+        "sole_proprietor", "contractor", "employee"
+    ]] = None
 
 
 class TaxResponse(BaseModel):
@@ -68,14 +71,20 @@ class TaxRecordCreate(BaseModel):
     tax_year: int = Field(..., ge=2000, le=2100)
     income: Decimal = Field(..., gt=0)
     expenses: Optional[Decimal] = Field(Decimal("0"), ge=0)
-    entity_type: Optional[Literal["partnership", "corporation", "employer"]] = None
+    entity_type: Optional[Literal[
+        "partnership", "corporation", "employer",
+        "sole_proprietor", "contractor", "employee"
+    ]] = None
 
 
 class TaxRecordUpdate(BaseModel):
     entity_name: Optional[str] = Field(None, min_length=1, max_length=255)
     income: Optional[Decimal] = Field(None, gt=0)
     expenses: Optional[Decimal] = Field(None, ge=0)
-    entity_type: Optional[Literal["partnership", "corporation", "employer"]] = None
+    entity_type: Optional[Literal[
+        "partnership", "corporation", "employer",
+        "sole_proprietor", "contractor", "employee"
+    ]] = None
 
 
 class TaxRecordResponse(BaseModel):
