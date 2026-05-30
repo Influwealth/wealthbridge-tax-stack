@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ -v \
+            --cov=app --cov=tax_capsule --cov=irs_forms --cov=rd_plugin \
+            --cov-report=term-missing \
+            --cov-fail-under=70
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check . --ignore E501
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t wealthbridge-tax-stack:ci .
+
+      - name: Smoke test Docker image
+        run: |
+          docker run -d --name smoke \
+            -e DATABASE_URL=sqlite:///test.db \
+            -e SECRET_KEY=ci-test-secret-key-for-smoke-test \
+            -p 8001:8000 \
+            wealthbridge-tax-stack:ci
+          sleep 8
+          curl -f http://localhost:8001/health
+          docker stop smoke
