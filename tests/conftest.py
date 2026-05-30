@@ -7,8 +7,20 @@ from app.database import Base, get_db
 from app.main import app
 from app import models
 from app.auth import hash_password
+from app.cache import _local_cache
+from app.middleware.rate_limit import _local_buckets
 
 SQLALCHEMY_TEST_URL = "sqlite:///./test.db"
+
+
+@pytest.fixture(autouse=True)
+def reset_in_process_state():
+    """Clear rate-limit buckets and cache before every test."""
+    _local_buckets.clear()
+    _local_cache.clear()
+    yield
+    _local_buckets.clear()
+    _local_cache.clear()
 
 
 @pytest.fixture(scope="session")
