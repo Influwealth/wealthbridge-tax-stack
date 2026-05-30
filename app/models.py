@@ -50,6 +50,22 @@ class UserRole(Base):
     user = relationship("User", foreign_keys=[user_id], back_populates="user_roles")
 
 
+class TaxDocument(Base):
+    __tablename__ = "tax_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    record_id = Column(Integer, ForeignKey("tax_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    doc_type = Column(String(50), nullable=False, index=True)
+    format = Column(String(10), nullable=False)
+    vault_key = Column(String(255), nullable=False)
+    size_bytes = Column(Integer, nullable=True)
+    checksum_sha256 = Column(String(64), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=func.now())
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    record = relationship("TaxRecord", back_populates="documents")
+
+
 class TaxRecord(Base):
     __tablename__ = "tax_records"
 
@@ -65,3 +81,4 @@ class TaxRecord(Base):
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     creator = relationship("User", foreign_keys=[created_by], back_populates="tax_records")
+    documents = relationship("TaxDocument", back_populates="record", cascade="all, delete-orphan")
