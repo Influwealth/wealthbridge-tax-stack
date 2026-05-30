@@ -136,3 +136,15 @@ class RDDocument(Base):
     uploaded_at = Column(DateTime(timezone=True), default=func.now())
 
     project = relationship("RDProject", back_populates="rd_documents")
+
+
+class AnalyticsSnapshot(Base):
+    __tablename__ = "analytics_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    snapshot_type = Column(String(50), nullable=False, index=True)
+    entity_name = Column(String(255), nullable=True, index=True)
+    tax_year = Column(Integer, nullable=True)
+    payload = Column(Text, nullable=False)   # JSON blob
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=func.now())
