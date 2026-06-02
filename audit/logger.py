@@ -19,7 +19,7 @@ Usage:
     )
 """
 import json
-from typing import Any, Optional
+from typing import Optional
 from sqlalchemy.orm import Session
 from app import models
 from tax_capsule.utils.logger import get_logger

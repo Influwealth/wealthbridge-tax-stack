@@ -10,7 +10,7 @@ When prior 3-year QRE average is available:
 """
 from decimal import Decimal
 
-from qre_agent.classifier import classify_activity, is_qualified_activity, ActivityType
+from qre_agent.classifier import classify_activity, is_qualified_activity
 from qre_agent.scorer import score_all_expenses, ExpenseRecord, ExpenseCategory
 from qre_agent.validator import validate_project_documentation
 

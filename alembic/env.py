@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.database import Base
-import app.models  # noqa: F401 — registers all models so Alembic detects them
+from app.database import Base  # noqa: E402
+import app.models  # noqa: E402, F401 — registers all models so Alembic detects them
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", ""))

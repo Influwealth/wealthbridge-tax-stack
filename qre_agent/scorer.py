@@ -8,7 +8,7 @@ Qualification rates per IRC §41(b):
   - Other qualified: 100%
   - Non-qualified: 0%
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 

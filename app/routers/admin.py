@@ -4,7 +4,6 @@ Admin router — firm and tenant management.
 All endpoints require the 'admin' role (users:manage permission).
 Provides the hierarchical Firm → Tenant structure for multi-tenant isolation.
 """
-import json
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -91,7 +90,7 @@ def list_firms(
     db: Session = Depends(get_db),
     _: models.User = Depends(require_permission("users:manage")),
 ):
-    firms = db.query(models.Firm).filter(models.Firm.is_active == True).all()
+    firms = db.query(models.Firm).filter(models.Firm.is_active.is_(True)).all()
     return [
         FirmResponse(
             id=f.id, name=f.name, slug=f.slug, is_active=f.is_active,
@@ -129,7 +128,7 @@ def create_tenant(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_permission("users:manage")),
 ):
-    firm = db.query(models.Firm).filter(models.Firm.id == firm_id, models.Firm.is_active == True).first()
+    firm = db.query(models.Firm).filter(models.Firm.id == firm_id, models.Firm.is_active.is_(True)).first()
     if not firm:
         raise HTTPException(status_code=404, detail="Firm not found or inactive")
 

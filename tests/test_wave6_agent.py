@@ -4,7 +4,6 @@ import time
 import hmac
 import hashlib
 import base64
-import pytest
 from unittest.mock import MagicMock, patch
 
 
@@ -28,7 +27,6 @@ def test_verify_supabase_jwt_valid():
     token = _make_supabase_jwt(claims, secret)
 
     with patch.dict("os.environ", {"SUPABASE_JWT_SECRET": secret}):
-        from supabase.auth import verify_supabase_jwt
         import importlib
         import supabase.auth as sb_auth
         importlib.reload(sb_auth)

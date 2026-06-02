@@ -7,7 +7,7 @@ Snapshot creation (saving results) requires filings:write.
 import json
 from decimal import Decimal
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 

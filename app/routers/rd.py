@@ -16,7 +16,7 @@ from app.rbac import require_permission
 from qre_agent.classifier import classify_activity
 from qre_agent.scorer import score_expense, ExpenseCategory
 from qre_agent.validator import validate_project_documentation
-from qre_agent.engine import calculate_credit, analyze_project
+from qre_agent.engine import calculate_credit
 from tax_capsule.utils.schemas import (
     RDProjectCreate, RDProjectUpdate, RDProjectResponse,
     RDExpenseCreate, RDExpenseResponse,

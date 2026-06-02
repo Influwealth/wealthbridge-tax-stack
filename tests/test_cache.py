@@ -1,11 +1,9 @@
 """Wave 4: Cache layer, rate limiting, and background task tests."""
 import time
-import pytest
-from unittest.mock import patch, MagicMock
 
 from app.cache import (
     cache_set, cache_get, cache_delete, cache_clear_prefix,
-    cached, is_redis_available, _local_cache,
+    cached, is_redis_available,
 )
 from app.middleware.rate_limit import _local_buckets
 
@@ -135,7 +133,7 @@ def test_rate_limit_allows_normal_traffic(client, auth_headers):
 
 def test_rate_limit_429_when_exceeded(client, auth_headers):
     """Hammer the endpoint beyond per-minute limit to trigger 429."""
-    from app.middleware.rate_limit import RATE_LIMIT_PER_MINUTE, _local_buckets
+    from app.middleware.rate_limit import RATE_LIMIT_PER_MINUTE
 
     ip = "testclient"
     # Pre-fill bucket to simulate limit already reached
@@ -149,7 +147,7 @@ def test_rate_limit_429_when_exceeded(client, auth_headers):
 
 def test_rate_limit_resets_after_window(client, auth_headers):
     """After the 1-minute window rolls over, counter should reset."""
-    from app.middleware.rate_limit import RATE_LIMIT_PER_MINUTE, _local_buckets
+    from app.middleware.rate_limit import RATE_LIMIT_PER_MINUTE
 
     ip = "testclient"
     # Set window start to 2 minutes ago (expired)

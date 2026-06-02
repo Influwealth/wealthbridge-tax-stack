@@ -7,7 +7,6 @@ No new tables required; results are computed on-the-fly (with cache layer suppor
 from decimal import Decimal
 from typing import Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app import models
 

@@ -2,7 +2,7 @@
 Documents router — generate, store, retrieve, validate, and delete tax documents.
 Supports PDF (pure-Python) and XML (MeF stub) output.
 """
-from typing import Literal, List, Optional
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel

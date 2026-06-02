@@ -2,10 +2,7 @@
 Wave 1 RBAC tests.
 Covers: permission matrix, role assignment/revocation, cross-role isolation.
 """
-import pytest
-from app.rbac import user_has_permission, ROLE_PERMISSIONS
-from app import models
-from app.auth import hash_password
+from app.rbac import user_has_permission
 
 
 # ─── Unit: permission matrix ────────────────────────────────────────────────

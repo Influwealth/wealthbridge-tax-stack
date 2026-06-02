@@ -6,7 +6,7 @@ GET  /agent/tools — list available tool schemas
 GET  /agent/status — check agent availability
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from app import models
