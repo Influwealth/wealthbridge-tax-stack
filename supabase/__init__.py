@@ -1,0 +1,1 @@
+# Supabase hybrid integration module

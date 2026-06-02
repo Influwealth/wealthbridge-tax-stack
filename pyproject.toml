@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "wealthbridge-tax-stack"
+version = "3.0.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["app", "tax_capsule", "irs_forms", "manager_sync_agent", "agoda_connector", "rd_plugin"]
+omit = ["tests/*", "scripts/*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
