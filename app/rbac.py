@@ -9,10 +9,8 @@ Permission matrix — which roles hold which scopes:
   auditor        : filings:read, audit:read, records:read, expenses:read
 """
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
-from app.database import get_db
 from app import models
 
 # All available permission scopes

@@ -9,7 +9,6 @@ Config via env vars:
   SUPABASE_KEY   anon/service-role key
 """
 import os
-from typing import Optional
 from tax_capsule.utils.logger import get_logger
 
 logger = get_logger("SupabaseClient")

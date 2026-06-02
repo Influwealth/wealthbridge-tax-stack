@@ -1,6 +1,4 @@
 """Wave 3: PDF + XML e-file + document vault tests."""
-import json
-import pytest
 from decimal import Decimal
 from documents.pdf_filler import fill_form_pdf
 from documents.xml_efile import generate_1120_xml, generate_1065_xml

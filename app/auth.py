@@ -99,7 +99,7 @@ def _try_supabase_jwt(token: str, db: Session) -> Optional[models.User]:
             return None
         return db.query(models.User).filter(
             models.User.username == username,
-            models.User.is_active == True,
+            models.User.is_active.is_(True),
         ).first()
     except Exception:
         return None

@@ -1,7 +1,5 @@
 """Wave 8: Multi-Tenant Architecture — firm/tenant management, audit logging, isolation tests."""
-import pytest
 from app import models
-from app.auth import hash_password
 from audit.logger import log_action, get_audit_trail
 
 
@@ -26,7 +24,6 @@ def test_audit_log_create(db_session, admin_user):
 
 def test_audit_log_immutable_no_update(db_session, admin_user):
     """Verify the audit logger has no update method (append-only design)."""
-    from audit.logger import log_action
     # Only log_action and get_audit_trail exist — no update function
     import audit.logger as al
     public_fns = [name for name in dir(al) if not name.startswith("_")]
@@ -79,7 +76,7 @@ def test_audit_log_with_tenant(db_session, admin_user):
 # ─── Tenant middleware — unit tests ───────────────────────────────────────────
 
 def test_tenant_middleware_parses_header():
-    from app.middleware.tenant import TenantMiddleware, TENANT_HEADER
+    from app.middleware.tenant import TENANT_HEADER
     assert TENANT_HEADER == "X-Tenant-ID"
 
 

@@ -1,5 +1,4 @@
 """Wave 5: QRE Agent — classifier, scorer, validator, engine, and API tests."""
-import pytest
 from decimal import Decimal
 from qre_agent.classifier import classify_activity, is_qualified_activity, ActivityType
 from qre_agent.scorer import (

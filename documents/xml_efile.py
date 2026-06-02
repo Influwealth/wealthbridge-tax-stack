@@ -7,7 +7,6 @@ taxpayer TIN, and schema validation against the official XSD.
 """
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from typing import Any
 
 
 def _pretty_xml(root: ET.Element) -> str:

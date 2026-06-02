@@ -1,5 +1,4 @@
 """Wave 7: BI Dashboard, Forecasting, and Credit Optimizer tests."""
-import pytest
 from decimal import Decimal
 
 

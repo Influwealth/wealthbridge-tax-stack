@@ -6,7 +6,6 @@ implementation once the cryptography package issue is resolved in the deployment
 """
 import io
 import textwrap
-from datetime import datetime, timezone
 from typing import Any
 
 
@@ -44,7 +43,7 @@ def _write_pdf_bytes(title: str, fields: dict[str, Any]) -> bytes:
     content_lines = [
         "BT",
         "/F1 14 Tf",
-        f"50 780 Td",
+        "50 780 Td",
         f"({_escape_pdf_string(title)}) Tj",
         "0 -20 Td",
         "/F1 10 Tf",
@@ -58,26 +57,19 @@ def _write_pdf_bytes(title: str, fields: dict[str, Any]) -> bytes:
     content_lines.append("ET")
     stream_content = "\n".join(content_lines).encode()
 
-    # Object 1: Catalog — forward ref to pages (obj 2)
-    cat_id = add_obj(b"<< /Type /Catalog /Pages 2 0 R >>")
-
-    # Object 2: Pages — forward ref to page (obj 3)
-    pages_id = add_obj(b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>")
-
-    # Object 3: Content stream
-    stream_id = add_obj(
+    # Objects 1-5: Catalog, Pages, Content stream, Font, Page
+    # IDs are referenced by position (1 0 R … 5 0 R), not by variable
+    add_obj(b"<< /Type /Catalog /Pages 2 0 R >>")
+    add_obj(b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>")
+    add_obj(
         b"<< /Length " + str(len(stream_content)).encode() + b" >>\n"
         b"stream\n" + stream_content + b"\nendstream"
     )
-
-    # Object 4: Font
-    font_id = add_obj(
+    add_obj(
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica "
         b"/Encoding /WinAnsiEncoding >>"
     )
-
-    # Object 5: Page
-    page_id = add_obj(
+    add_obj(
         b"<< /Type /Page /Parent 2 0 R "
         b"/MediaBox [0 0 612 792] "
         b"/Contents 3 0 R "
